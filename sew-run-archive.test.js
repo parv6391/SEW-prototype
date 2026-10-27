@@ -6,6 +6,7 @@ function storage() { const data = new Map(); return { getItem: k => data.get(k) 
 test('versioned run export imports and verifies', () => {
   const store = archive.createStore(storage()), saved = store.save(run());
   const restored = archive.parse(store.export(saved));
+  assert.match(restored.id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   assert.equal(restored.format, 'sew-run'); assert.equal(restored.version, 1); assert.deepEqual(restored.run, run());
 });
 test('corruption and unsupported format fail closed', () => {
@@ -17,7 +18,7 @@ test('corruption and unsupported format fail closed', () => {
 test('import is idempotent and deletion is explicit', () => {
   const store = archive.createStore(storage()), row = archive.envelope(run(), '2026-10-27T00:00:00.000Z');
   store.import(JSON.stringify(row)); store.import(JSON.stringify(row)); assert.equal(store.list().length, 1);
-  assert.equal(store.remove(row.createdAt), true); assert.equal(store.list().length, 0);
+  assert.equal(store.remove(row.id), true); assert.equal(store.list().length, 0);
 });
 test('invalid run is never saved', () => {
   const store = archive.createStore(storage()); assert.throws(() => store.save({ model: 'other', seed: 1 }));
