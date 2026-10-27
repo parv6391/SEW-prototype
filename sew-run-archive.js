@@ -11,6 +11,7 @@
     if (value && typeof value === 'object') return '{' + Object.keys(value).sort().map(k => JSON.stringify(k) + ':' + canonical(value[k])).join(',') + '}';
     return JSON.stringify(value);
   }
+  // Detects accidental changes; this non-cryptographic checksum does not authenticate records.
   function checksum(value) {
     const text = canonical(value); let hash = 0x811c9dc5;
     for (let i = 0; i < text.length; i++) { hash ^= text.charCodeAt(i); hash = Math.imul(hash, 0x01000193); }
@@ -25,13 +26,15 @@
   }
   function envelope(run, createdAt) {
     validateRun(run);
-    const record = { format: FORMAT, version: VERSION, createdAt: createdAt || new Date().toISOString(), run };
+    if (!globalThis.crypto || typeof globalThis.crypto.randomUUID !== 'function') throw new Error('Secure random UUID support is required.');
+    const record = { id: globalThis.crypto.randomUUID(), format: FORMAT, version: VERSION, createdAt: createdAt || new Date().toISOString(), run };
     return Object.assign(record, { checksum: checksum(record) });
   }
   function parse(text) {
     let record;
     try { record = JSON.parse(text); } catch (_) { throw new TypeError('Archive is not valid JSON.'); }
     if (!record || record.format !== FORMAT || record.version !== VERSION) throw new TypeError('Unsupported archive format or version.');
+    if (typeof record.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(record.id)) throw new TypeError('Archive ID is invalid.');
     if (typeof record.createdAt !== 'string' || Number.isNaN(Date.parse(record.createdAt))) throw new TypeError('Archive timestamp is invalid.');
     if (typeof record.checksum !== 'string') throw new TypeError('Archive checksum is missing.');
     const { checksum: supplied, ...body } = record;
@@ -49,8 +52,8 @@
     return {
       list: readAll,
       save(run) { const row = envelope(run), rows = readAll(); rows.unshift(row); storage.setItem(STORAGE_KEY, JSON.stringify(rows)); return row; },
-      remove(createdAt) { const rows = readAll(), index = rows.findIndex(row => row.createdAt === createdAt); if (index < 0) return false; rows.splice(index, 1); storage.setItem(STORAGE_KEY, JSON.stringify(rows)); return true; },
-      import(text) { const row = parse(text), rows = readAll(); if (!rows.some(existing => existing.checksum === row.checksum)) { rows.unshift(row); storage.setItem(STORAGE_KEY, JSON.stringify(rows)); } return row; },
+      remove(id) { const rows = readAll(), index = rows.findIndex(row => row.id === id || row.createdAt === id); if (index < 0) return false; rows.splice(index, 1); storage.setItem(STORAGE_KEY, JSON.stringify(rows)); return true; },
+      import(text) { const row = parse(text), rows = readAll(); if (!rows.some(existing => existing.id === row.id)) { rows.unshift(row); storage.setItem(STORAGE_KEY, JSON.stringify(rows)); } return row; },
       export(row) { return JSON.stringify(parse(JSON.stringify(row)), null, 2); }
     };
   }
