@@ -34,7 +34,7 @@ The original scientific-model boundaries, integrity requirements, and separation
 
 ---
 
-## 1. Goals and boundaries
+##  Goals and boundaries
 
 Keep the scientific simulation independent of backend services.
 
@@ -55,7 +55,7 @@ Keep application code and scientific assets separate from live user data:
 - Treat imported and archived runs as data. Loading a run must not execute code or alter the scientific model.
 - Keep user-associated information private and access-controlled. Personal information must never be exposed through public archive listings.
 
-## 2. Proposed implementation path
+## Proposed implementation path
 
 1. Preserve the existing static prototype and scientific simulation.
 2. Establish versioned local run persistence, export/import, and integrity verification.
@@ -70,7 +70,7 @@ Keep application code and scientific assets separate from live user data:
 
 The simulation must remain usable without depending on authentication availability or Google Drive connectivity.
 
-## 3. Authentication and account identity
+## Authentication and account identity
 
 Google and GitHub are the initial supported authentication providers.
 
@@ -93,7 +93,7 @@ The architecture should permit additional authentication providers in the future
 
 Authentication credentials and provider tokens must remain outside version-controlled source and client-accessible static configuration.
 
-## 4. Run identity and record structure
+## Run identity and record structure
 
 Assign each saved run a random, opaque ID generated independently of user identity.
 
@@ -132,7 +132,7 @@ Maintain the distinction between permanent scientific runs and demo runs:
 - Must not be represented as permanent scientific seed-based runs.
 - Must not overwrite or alter established scientific records.
 
-## 5. Storage hierarchy
+## Storage hierarchy
 
 Use a hierarchical storage structure rather than treating storage branches as scientific or research lineages.
 
@@ -153,7 +153,7 @@ The hierarchy describes where records are stored and how they are organized. It 
 
 Personal data and account associations must remain access-controlled. Internal storage organization must not become a public directory of user records.
 
-## 6. Master-key authority and administrative access
+## Master-key authority and administrative access
 
 The system includes a dedicated master-key authority with full control over administrative features and stored data.
 
@@ -181,7 +181,7 @@ The recovery copy must not become an independently accessible ordinary credentia
 
 Master-key operations should produce a minimal, protected audit record without exposing the key or sensitive user content.
 
-## 7. Privacy and access control
+## Privacy and access control
 
 User-associated data is private by default.
 
@@ -202,7 +202,7 @@ Minimize personal information in:
 - Exported records.
 - Archive listings.
 
-## 8. Offline behavior and synchronization
+## Offline behavior and synchronization
 
 Network availability must not determine whether the scientific simulation can continue.
 
@@ -219,7 +219,7 @@ Interrupted synchronization must not create silent overwrites or duplicate scien
 
 Local-save results and remote-storage results must be reported separately.
 
-## 9. Submission and storage quotas
+## Submission and storage quotas
 
 Introduce two separate quota categories:
 
@@ -237,7 +237,7 @@ Quota values should be reasonable and configurable for the prototype.
 
 The system should remain lightweight. A complex billing, token-trading, or credit-economy mechanism is outside the current scope.
 
-## 10. Google Drive storage
+## Google Drive storage
 
 Google Drive is a storage destination, not the authentication authority, master-key authority, or primary authorization system.
 
@@ -257,7 +257,7 @@ Store access credentials securely, support disconnect and token revocation, and 
 
 Drive connectivity must never be required to execute the simulation or access locally available records.
 
-## 11. Account deletion and anonymous archival
+## Account deletion and anonymous archival
 
 Account deletion must separate personal identity information from scientific run data.
 
@@ -300,7 +300,7 @@ The system must distinguish between actual anonymization and encryption of retai
 
 Retention and deletion behavior must be documented before deployment, including any copies, backups, and external storage limitations.
 
-## 12. Integrity failures and recovery
+## Integrity failures and recovery
 
 Verify every saved, transferred, or downloaded archive before treating it as a valid run.
 
@@ -320,7 +320,7 @@ Provide user-controlled backups and document where local data is stored, how to 
 
 Verify integrity before restoring over an existing record.
 
-## 13. Testing
+## Testing
 
 Before exposing backend features, test:
 
@@ -372,7 +372,7 @@ Keep backend tests separate from scientific-model validation. Passing storage or
 
 Keep authentication, centralized archival, master-key operations, and Drive integration disabled until their relevant tests and user-facing privacy, retention, and recovery documentation are complete.
 
-## 14. Unresolved implementation decisions
+## Unresolved implementation decisions
 
 The following decisions require explicit resolution before the corresponding features are implemented:
 
@@ -391,7 +391,7 @@ The following decisions require explicit resolution before the corresponding fea
 
 No unresolved decision should be silently converted into an implementation assumption.
 
-## 15. Change-management requirements
+## Change-management requirements
 
 All architectural changes must be documented in version control.
 
