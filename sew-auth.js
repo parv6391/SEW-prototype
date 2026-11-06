@@ -1,66 +1,100 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = "https://yhyfkvpqqvzmnosakygw.supabase.co";
+// ============================================
+// SEW AUTHENTICATION CONFIGURATION
+// ============================================
 
+const SUPABASE_URL =
+  "https://yhyfkvpqqvzmnosakygw.supabase.co";
 
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_kzdnLCG-P-5CNOKKcvfO6A_rNWhOluV";
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_kzdnLCG-P-5CNOKKcvfO6A_rNWhOluV";
+
+if (
+  !SUPABASE_URL ||
+  !SUPABASE_PUBLISHABLE_KEY ||
+  SUPABASE_PUBLISHABLE_KEY ===
+    "PASTE_YOUR_EXISTING_PUBLISHABLE_KEY_HERE"
+) {
+  throw new Error("SEW Auth: Supabase configuration is incomplete.");
+}
 
 const supabase = createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
 
-// ----------------------------------
-// SEW ACCOUNT INTERFACE
-// ----------------------------------
+// ============================================
+// CREATE AUTHENTICATION INTERFACE
+// ============================================
+
+const existingSection = document.getElementById("sew-auth");
+
+if (existingSection) {
+  existingSection.remove();
+}
 
 const section = document.createElement("section");
 
-section.className = "section";
 section.id = "sew-auth";
+section.className = "section";
 
 section.innerHTML = `
-  <h2>SEW account</h2>
+  <h2>SEW Account</h2>
 
-  <p class="muted" id="authStatus">
+  <p id="sew-auth-status" role="status" aria-live="polite">
     Checking authentication...
   </p>
 
-  <div class="actions" id="authActions"></div>
+  <div id="sew-auth-actions" class="sew-auth-actions"></div>
 
-  <div id="accountPanel" hidden>
+  <div id="sew-account-panel" hidden>
+
     <hr>
 
-    <h3>Account overview</h3>
+    <h3>Account Overview</h3>
 
-    <p id="accountEmail"></p>
-    <p class="muted" id="accountProvider"></p>
+    <p>
+      <strong>Email:</strong>
+      <span id="sew-account-email"></span>
+    </p>
 
-    <div class="auth-account-grid">
+    <p>
+      <strong>Provider:</strong>
+      <span id="sew-account-provider"></span>
+    </p>
 
-      <div class="auth-card">
+    <div class="sew-account-grid">
+
+      <article class="sew-account-card">
         <h3>Saved Runs</h3>
-        <p class="muted">
+        <p>
           Account-based run storage is not connected yet.
         </p>
-      </div>
+        <span class="sew-placeholder">Coming later</span>
+      </article>
 
-      <div class="auth-card">
+      <article class="sew-account-card">
         <h3>Demo Runs</h3>
-        <p class="muted">
-          Explore the existing SEW simulator.
+        <p>
+          Access the existing SEW demonstration simulator.
         </p>
-      </div>
+        <span class="sew-placeholder">Prototype feature</span>
+      </article>
 
-      <div class="auth-card">
-        <h3>Account settings</h3>
-        <p class="muted">
-          Basic account management.
+      <article class="sew-account-card">
+        <h3>Account Settings</h3>
+        <p>
+          Basic account information and sign-out.
         </p>
-      </div>
+        <span class="sew-placeholder">Basic controls</span>
+      </article>
 
     </div>
+
+    <div class="sew-account-controls" id="sew-account-controls"></div>
+
   </div>
 `;
 
@@ -69,25 +103,107 @@ const footer = document.querySelector("footer");
 if (footer) {
   footer.before(section);
 } else {
-  document.body.append(section);
+  document.body.appendChild(section);
 }
 
-// ----------------------------------
-// INTERFACE ELEMENTS
-// ----------------------------------
+// ============================================
+// ELEMENT REFERENCES
+// ============================================
 
-const status = document.getElementById("authStatus");
-const actions = document.getElementById("authActions");
+const statusElement =
+  document.getElementById("sew-auth-status");
 
-const accountPanel = document.getElementById("accountPanel");
-const accountEmail = document.getElementById("accountEmail");
-const accountProvider = document.getElementById("accountProvider");
+const actionsElement =
+  document.getElementById("sew-auth-actions");
 
-// ----------------------------------
+const accountPanel =
+  document.getElementById("sew-account-panel");
+
+const accountEmail =
+  document.getElementById("sew-account-email");
+
+const accountProvider =
+  document.getElementById("sew-account-provider");
+
+const accountControls =
+  document.getElementById("sew-account-controls");
+
+// ============================================
+// STYLING
+// ============================================
+
+const style = document.createElement("style");
+
+style.textContent = `
+  #sew-auth {
+    margin-top: 32px;
+  }
+
+  #sew-auth [hidden] {
+    display: none !important;
+  }
+
+  .sew-auth-actions,
+  .sew-account-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .sew-auth-actions button,
+  .sew-account-controls button {
+    cursor: pointer;
+  }
+
+  .sew-auth-actions button:disabled,
+  .sew-account-controls button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+  }
+
+  .sew-account-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+  }
+
+  .sew-account-card {
+    padding: 16px;
+    border: 1px solid var(--border-color, rgba(128,128,128,0.35));
+    border-radius: 10px;
+    min-width: 0;
+  }
+
+  .sew-account-card h3 {
+    margin-top: 0;
+  }
+
+  .sew-placeholder {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.85em;
+    opacity: 0.7;
+  }
+
+  #sew-auth-status {
+    min-height: 1.5em;
+  }
+`;
+
+document.head.appendChild(style);
+
+// ============================================
 // BUTTON CREATION
-// ----------------------------------
+// ============================================
 
-function makeButton(label, className, callback) {
+function createButton(
+  label,
+  callback,
+  className = ""
+) {
   const button = document.createElement("button");
 
   button.type = "button";
@@ -99,131 +215,128 @@ function makeButton(label, className, callback) {
 
   button.addEventListener("click", callback);
 
-  actions.append(button);
-
   return button;
 }
 
-// ----------------------------------
-// GOOGLE / GITHUB SIGN-IN
-// ----------------------------------
+// ============================================
+// SIGNED-OUT INTERFACE
+// ============================================
+
+function renderSignedOut(message = "Not signed in.") {
+  actionsElement.replaceChildren();
+  accountControls.replaceChildren();
+
+  accountPanel.hidden = true;
+
+  statusElement.textContent = message;
+
+  const googleButton = createButton(
+    "Continue with Google",
+    () => signIn("google")
+  );
+
+  const githubButton = createButton(
+    "Continue with GitHub",
+    () => signIn("github"),
+    "secondary"
+  );
+
+  actionsElement.append(
+    googleButton,
+    githubButton
+  );
+}
+
+// ============================================
+// OAUTH SIGN-IN
+// ============================================
 
 async function signIn(provider) {
-  status.textContent = `Connecting to ${provider}...`;
+  if (!["google", "github"].includes(provider)) {
+    statusElement.textContent =
+      "Unsupported authentication provider.";
 
-  actions.replaceChildren();
+    return;
+  }
+
+  actionsElement.replaceChildren();
+
+  statusElement.textContent =
+    `Connecting to ${provider}...`;
+
+  const loadingButton = createButton(
+    `Connecting to ${provider}...`,
+    () => {},
+  );
+
+  loadingButton.disabled = true;
+
+  actionsElement.appendChild(loadingButton);
 
   try {
+    const redirectTo =
+      window.location.origin +
+      window.location.pathname;
+
     const { data, error } =
       await supabase.auth.signInWithOAuth({
         provider,
 
         options: {
-          redirectTo:
-            window.location.origin +
-            window.location.pathname +
-            window.location.search +
-            window.location.hash,
-
-          skipBrowserRedirect: true
+          redirectTo
         }
       });
 
     if (error) {
-      status.textContent =
-        `Sign-in failed: ${error.message}`;
-
       console.error("SEW OAuth error:", error);
 
-      renderSignedOut();
+      renderSignedOut(
+        `Sign-in failed: ${error.message}`
+      );
+
       return;
     }
 
-    if (!data || !data.url) {
-      status.textContent =
-        "Sign-in failed: No authorization URL returned.";
+    // In a browser, Supabase normally redirects automatically.
+    // This check is retained as a diagnostic fallback.
+    if (data?.url) {
+      console.log(
+        "SEW OAuth authorization URL:",
+        data.url
+      );
 
-      console.error("SEW OAuth response:", data);
+      statusElement.textContent =
+        "Authentication request created. Redirecting...";
+    } else {
+      console.error(
+        "SEW OAuth returned no authorization URL:",
+        data
+      );
 
-      renderSignedOut();
-      return;
+      renderSignedOut(
+        "Sign-in failed: No authorization URL returned."
+      );
     }
-
-    console.log("SEW OAuth authorization URL:", data.url);
-
-    // Explicitly redirect the browser.
-    window.location.assign(data.url);
 
   } catch (error) {
-    status.textContent =
-      `Sign-in error: ${error.message}`;
-
     console.error("SEW OAuth exception:", error);
 
-    renderSignedOut();
+    renderSignedOut(
+      `Sign-in error: ${error.message}`
+    );
   }
 }
 
-// ----------------------------------
-// SIGN-OUT
-// ----------------------------------
-
-async function signOut() {
-  status.textContent = "Signing out...";
-
-  actions.replaceChildren();
-
-  try {
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      status.textContent =
-        `Sign-out failed: ${error.message}`;
-
-      console.error("SEW sign-out error:", error);
-
-      return;
-    }
-
-    renderSignedOut();
-
-  } catch (error) {
-    status.textContent =
-      `Sign-out error: ${error.message}`;
-
-    console.error("SEW sign-out exception:", error);
-  }
-}
-
-// ----------------------------------
-// SIGNED-OUT INTERFACE
-// ----------------------------------
-
-function renderSignedOut() {
-  actions.replaceChildren();
-
-  accountPanel.hidden = true;
-
-  status.textContent = "Not signed in.";
-
-  makeButton(
-    "Continue with Google",
-    "",
-    () => signIn("google")
-  );
-
-  makeButton(
-    "Continue with GitHub",
-    "secondary",
-    () => signIn("github")
-  );
-}
-
-// ----------------------------------
+// ============================================
 // SIGNED-IN INTERFACE
-// ----------------------------------
+// ============================================
 
 function renderSignedIn(session) {
+  if (!session?.user) {
+    renderSignedOut();
+    return;
+  }
+
   const user = session.user;
 
   const provider =
@@ -231,99 +344,168 @@ function renderSignedIn(session) {
     user.identities?.[0]?.provider ||
     "Unknown";
 
-  actions.replaceChildren();
+  actionsElement.replaceChildren();
+  accountControls.replaceChildren();
 
-  status.textContent = "Signed in successfully.";
+  statusElement.textContent =
+    "Signed in successfully.";
 
   accountEmail.textContent =
     user.email || "Email unavailable";
 
   accountProvider.textContent =
-    `Signed in through: ${provider}`;
+    provider.charAt(0).toUpperCase() +
+    provider.slice(1);
 
   accountPanel.hidden = false;
 
-  makeButton(
+  const signOutButton = createButton(
     "Sign out",
-    "secondary",
-    signOut
+    signOut,
+    "secondary"
   );
+
+  accountControls.appendChild(signOutButton);
 }
 
-// ----------------------------------
-// SESSION RENDERING
-// ----------------------------------
+// ============================================
+// SIGN-OUT
+// ============================================
+
+async function signOut() {
+  accountControls.replaceChildren();
+
+  statusElement.textContent = "Signing out...";
+
+  const loadingButton = createButton(
+    "Signing out...",
+    () => {}
+  );
+
+  loadingButton.disabled = true;
+
+  accountControls.appendChild(loadingButton);
+
+  try {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error("SEW sign-out error:", error);
+
+      renderSignedIn(await getCurrentSession());
+
+      statusElement.textContent =
+        `Sign-out failed: ${error.message}`;
+
+      return;
+    }
+
+    renderSignedOut("Signed out successfully.");
+
+  } catch (error) {
+    console.error("SEW sign-out exception:", error);
+
+    try {
+      const session = await getCurrentSession();
+
+      if (session) {
+        renderSignedIn(session);
+      } else {
+        renderSignedOut();
+      }
+    } catch (sessionError) {
+      console.error(
+        "SEW session recovery error:",
+        sessionError
+      );
+
+      renderSignedOut(
+        `Session error: ${sessionError.message}`
+      );
+    }
+
+    statusElement.textContent =
+      `Sign-out error: ${error.message}`;
+  }
+}
+
+// ============================================
+// SESSION MANAGEMENT
+// ============================================
+
+async function getCurrentSession() {
+  const { data, error } =
+    await supabase.auth.getSession();
+
+  if (error) {
+    throw error;
+  }
+
+  return data.session;
+}
 
 function renderSession(session) {
-  if (session && session.user) {
+  if (session?.user) {
     renderSignedIn(session);
   } else {
     renderSignedOut();
   }
 }
 
-// ----------------------------------
-// BASIC ACCOUNT CARD STYLING
-// ----------------------------------
-
-const style = document.createElement("style");
-
-style.textContent = `
-  .auth-account-grid {
-    display: grid;
-    grid-template-columns:
-      repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin-top: 18px;
-  }
-
-  .auth-card {
-    padding: 16px;
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 10px;
-  }
-
-  .auth-card h3 {
-    margin-top: 0;
-  }
-`;
-
-document.head.append(style);
-
-// ----------------------------------
-// AUTHENTICATION STATE
-// ----------------------------------
+// ============================================
+// AUTHENTICATION INITIALISATION
+// ============================================
 
 let authEventReceived = false;
 
-supabase.auth.onAuthStateChange((event, session) => {
-  authEventReceived = true;
+// Register the listener before checking the session.
+const {
+  data: { subscription }
+} = supabase.auth.onAuthStateChange(
+  (event, session) => {
+    authEventReceived = true;
 
-  console.log("SEW authentication event:", event);
+    console.log("SEW authentication event:", event);
 
-  renderSession(session);
-});
+    renderSession(session);
+  }
+);
 
 // Check for an existing session.
-supabase.auth.getSession().then(({ data, error }) => {
+supabase.auth.getSession()
+  .then(({ data, error }) => {
+    if (authEventReceived) {
+      return;
+    }
 
-  if (authEventReceived) return;
+    if (error) {
+      console.error(
+        "SEW initial session error:",
+        error
+      );
 
-  if (error) {
-    status.textContent =
-      `Session check failed: ${error.message}`;
+      renderSignedOut(
+        `Session check failed: ${error.message}`
+      );
 
-    console.error("SEW session error:", error);
+      return;
+    }
 
-    return;
-  }
+    renderSession(data.session);
+  })
+  .catch((error) => {
+    console.error(
+      "SEW initialisation exception:",
+      error
+    );
 
-  renderSession(data.session);
-}).catch((error) => {
+    renderSignedOut(
+      `Authentication initialisation failed: ${error.message}`
+    );
+  });
 
-  status.textContent =
-    `Session check failed: ${error.message}`;
+// ============================================
+// MODULE READY
+// ============================================
 
-  console.error("SEW session exception:", error);
-
-});
+console.log("SEW authentication module loaded.");
